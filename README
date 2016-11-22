@@ -1,3 +1,15 @@
 zampylit.py - a tool for measuring progress on group writing projects
 
 port of the zampolit tool to Python: https://github.com/briansniffen/zampolit
+
+This tool currently prefers Python 2.7 (patches for Python 3 compatability welcomed).
+
+It requires several dependencies described in the requirements.txt file. To install:
+
+pip install --user -r requirements.txt
+
+It also requires Git and Gnuplot.  To install on Mac OS X with Homebrew:
+
+brew install git
+brew install pdflib-lite
+brew install gnuplot --with-pdflib-lite --build-from-source

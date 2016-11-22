@@ -79,7 +79,7 @@ def main():
     out = open(args.output_file+'.gnuplot', 'w')
     out.write('set xdata time\n')
     out.write('set timefmt "%s"\n')
-    out.write('set format x "%m/%d"\n')
+    out.write('set format x "%m/%Y"\n')
     out.write('set terminal pdf size 10in,7.5in\n')
     out.write('set output "%s.pdf"\n' % (args.output_file,))
     out.write('set xlabel "date"\n')

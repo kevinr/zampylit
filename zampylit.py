@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import os, sys, re, argparse
+import os, sys, re, argparse, csv
 import arrow
 
 if os.name == 'posix' and sys.version_info[0] < 3:
@@ -16,8 +16,19 @@ def main():
     parser.add_argument('--game-name', '-g', metavar='GAMENAME', default=wdir, help="the game's name (default: %(default)s)")
     parser.add_argument('--output-file', '-o', metavar='FILE', default=(wdir+'-wc'), help="prefix of the files to output (default: %(default)s)")
     parser.add_argument('--extensions', '-e', metavar='EXT', default='.tex,.txt', help="extensions of files whose words to count (default: %(default)s)")
-    parser.add_argument('--namefold', '-n', metavar='FILE', help="file containing name mappings")
+    parser.add_argument('--namefold', '-n', metavar='FILE', default='.namefold', help="file containing name mappings")
     args = parser.parse_args()
+
+    name_mappings = {}
+    if args.namefold and os.path.exists(args.namefold):
+        with open(args.namefold, 'rb') as nf:
+            dialect = csv.Sniffer().sniff(nf.read(1024))
+            nf.seek(0)
+            nfreader = csv.reader(nf, dialect, strict=True)
+            for row in nfreader:
+                name_mappings[row[0]] = row[1]
+
+    print name_mappings
 
     gitlog = subprocess.check_output(['git', 'log'], universal_newlines=True)
 
@@ -50,11 +61,16 @@ def main():
             sys.stderr.write(str(ex))
             wc = 0
 
-        if e['author'] not in running_totals_by_author:
-            running_totals_by_author[e['author']] = 0
-        running_totals_by_author[e['author']] += (wc - running_total)
+        if e['author'] in name_mappings:
+            canonical_author = name_mappings[e['author']]
+        else:
+            canonical_author = e['author']
 
-        d = {'author': e['author'], 'date': e['date'], 'words': running_totals_by_author[e['author']]}
+        if canonical_author not in running_totals_by_author:
+            running_totals_by_author[canonical_author] = 0
+        running_totals_by_author[canonical_author] += (wc - running_total)
+
+        d = {'author': canonical_author, 'date': e['date'], 'words': running_totals_by_author[canonical_author]}
         datapoints.append(d)
         print(d)
 

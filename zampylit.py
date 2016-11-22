@@ -60,6 +60,25 @@ def main():
 
         running_total = int(wc)
 
-    print(datapoints)
+    out = open(args.output_file+'.gnuplot', 'w')
+    out.write('set xdata time\n')
+    out.write('set timefmt "%s"\n')
+    out.write('set format x "%m/%d"\n')
+    out.write('set terminal pdf size 10in,7.5in\n')
+    out.write('set output "%s.pdf"\n' % (args.output_file,))
+    out.write('set xlabel "date"\n')
+    out.write('set ylabel "words"\n')
+    out.write('set title "%s word counts by author"\n' % (args.game_name,))
+    out.write('set datafile missing "?"\n')
+    out.write('plot ' + ', '.join(['"%s.data" using 1:($%d) title "%s"' % (args.output_file, i, author) for i, author in enumerate(running_totals_by_author.keys(), 2)]) + '\n')
+    out.close()
+
+    data = open(args.output_file+'.data', 'w')
+    for d in datapoints:
+        print(d)
+        data.write('\t'.join([str(d['date'].timestamp)] + [str(d['words']) if d['author'] == a else '?' for a in running_totals_by_author.keys()]) + '\n')
+    data.close()
+
+    subprocess.check_call(['gnuplot', args.output_file+'.gnuplot'])
 
 if __name__=='__main__': main()

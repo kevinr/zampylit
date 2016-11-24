@@ -15,7 +15,8 @@ def main():
     parser = argparse.ArgumentParser(description='A tool for measuring progress on group writing projects')
     parser.add_argument('--game-name', '-g', metavar='GAMENAME', default=wdir, help="the game's name (default: %(default)s)")
     parser.add_argument('--output-file', '-o', metavar='FILE', default=(wdir+'-wc'), help="prefix of the files to output (default: %(default)s)")
-    parser.add_argument('--extensions', '-e', metavar='EXT', default='.tex,.txt', help="extensions of files whose words to count (default: %(default)s)")
+    parser.add_argument('--paths', '-p', metavar='PATH', default='.', help='paths to look in for words, comma-separated (default: %(default)s)')
+    parser.add_argument('--extensions', '-e', metavar='EXT', default='.tex,.txt', help="extensions of files whose words to count, comma-separated (default: %(default)s)")
     parser.add_argument('--namefold', '-n', metavar='FILE', default='.namefold', help="file containing name mappings")
     args = parser.parse_args()
 
@@ -45,8 +46,9 @@ def main():
         date = arrow.get(e.group('date'), 'ddd MMM D HH:mm:ss YYYY Z')
         changelog_entries.append({'commit': commit, 'author': author, 'date': date})
         
+    paths = ' '.join(args.paths.split(','))
     exts = ' -o '.join(['-name \*%s' % (x.strip(),) for x in args.extensions.split(',')])
-    cmd = 'find . -type f \( %s \) -print0 | xargs -0 wc -w | tail -1 | grep -o "[0-9]\+"' % (exts,)
+    cmd = 'find %s -type f \( %s \) -print0 | xargs -0 wc -w | tail -1 | grep -o "[0-9]\+"' % (paths, exts,)
 
     running_total = 0
     running_totals_by_author = {}

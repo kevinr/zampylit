@@ -86,6 +86,7 @@ def main():
     out.write('set output "%s.pdf"\n' % (args.output_file,))
     out.write('set xlabel "date"\n')
     out.write('set ylabel "words"\n')
+    out.write('set key left top\n')
     out.write('set title "%s word counts by author"\n' % (args.game_name,))
     out.write('set datafile missing "?"\n')
     out.write('plot ' + ', '.join(['"%s.data" using 1:($%d) title "%s"' % (args.output_file, i, author) for i, author in enumerate(running_totals_by_author.keys(), 2)]) + '\n')

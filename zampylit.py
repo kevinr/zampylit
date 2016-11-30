@@ -18,6 +18,7 @@ def main():
     parser.add_argument('--paths', '-p', metavar='PATH', default='.', help='paths to look in for words, comma-separated (default: %(default)s)')
     parser.add_argument('--extensions', '-e', metavar='EXT', default='.tex,.txt', help="extensions of files whose words to count, comma-separated (default: %(default)s)")
     parser.add_argument('--namefold', '-n', metavar='FILE', default='.namefold', help="file containing name mappings")
+    parser.add_argument('--abs', action='store_true', help="count the absolute value of words changed in a revision rather than the delta")
     args = parser.parse_args()
 
     name_mappings = {}
@@ -70,7 +71,11 @@ def main():
 
         if canonical_author not in running_totals_by_author:
             running_totals_by_author[canonical_author] = 0
-        running_totals_by_author[canonical_author] += (wc - running_total)
+
+        if args.abs:
+            running_totals_by_author[canonical_author] += abs(wc - running_total)
+        else:
+            running_totals_by_author[canonical_author] += (wc - running_total)
 
         d = {'author': canonical_author, 'date': e['date'], 'words': running_totals_by_author[canonical_author]}
         datapoints.append(d)
